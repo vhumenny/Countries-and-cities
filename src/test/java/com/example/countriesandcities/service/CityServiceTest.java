@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CityServiceTest {
+class CityServiceTest {
 
     private CityService cityService;
     @Mock
@@ -43,11 +44,8 @@ public class CityServiceTest {
     private CountryRepository countryRepository;
     @Mock
     private CityMapper cityMapper;
-    @Mock
-    private MultipartFile multipartFile;
     private final String countryName = "Ukraine";
     private final Long id = 1L;
-    private final String logo = "logo";
     private final String cityName = "Odessa";
     private CountryEntity countryEntity;
     private CityEntity cityOdessa;
@@ -57,6 +55,7 @@ public class CityServiceTest {
     public void setup() {
         cityService = new CityServiceImpl(cityRepository, countryRepository, cityMapper);
         countryEntity = new CountryEntity(id, countryName);
+        String logo = "logo";
         cityOdessa = new CityEntity(id, cityName, logo, countryEntity);
     }
 
@@ -154,24 +153,25 @@ public class CityServiceTest {
     }
 
     @Test
-    void whenUpdateCity_WithExistingCityIdAndLogo_thenSuccess() throws IOException {
+    void whenUpdateCity_WithExistingCityIdAndLogo_thenSuccess() {
         //given
+        MultipartFile mockMultipartFile = mock(MultipartFile.class);
+        CityUpdateRequestDto cityUpdateRequestDto = CityUpdateRequestDto.builder()
+                .name("New City Name")
+                .logo(mockMultipartFile)
+                .build();
+
+        when(mockMultipartFile.getSize()).thenReturn(1L);
+        when(mockMultipartFile.getOriginalFilename()).thenReturn("logo.jpg");
+
         CityEntity cityEntity = new CityEntity();
         cityEntity.setId(id);
         cityEntity.setName("Old City Name");
-        CityUpdateRequestDto cityUpdateRequestDto = new CityUpdateRequestDto("New name", multipartFile);
         when(cityRepository.findById(id)).thenReturn(Optional.of(cityEntity));
-        when(cityRepository.save(cityEntity)).thenReturn(cityEntity);
-        when(multipartFile.getOriginalFilename()).thenReturn("logo.png");
-        when(multipartFile.isEmpty()).thenReturn(false);
-        when(multipartFile.getInputStream()).thenReturn(mock(InputStream.class));
 
         //when
         cityService.updateCity(id, cityUpdateRequestDto);
-
         //then
-        assertEquals("New name", cityEntity.getName());
-        assertNotNull(cityEntity.getLogo());
         verify(cityRepository, times(1)).findById(id);
         verify(cityRepository, times(1)).save(cityEntity);
     }

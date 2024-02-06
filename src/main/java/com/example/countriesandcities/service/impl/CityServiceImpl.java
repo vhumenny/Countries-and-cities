@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +38,7 @@ public class CityServiceImpl implements CityService {
     private final CityMapper cityMapper;
 
     public static final String LOCATION_IMAGES =
-            "C:/Users/v.gumennyi/IdeaProjects/Countries-and-cities/src/main/resources/images/logos/";
+            "C:/Users/v.gumennyi/IdeaProjects/Countries-and-cities/src/main/resources/images/logos";
 
     @Override
     public List<CityResponseDto> getCitiesByCountryName(String name) {
@@ -102,18 +103,20 @@ public class CityServiceImpl implements CityService {
 
     private String getLogoPart(MultipartFile logoFile) {
         String logoName = null;
-        if (logoFile != null && !logoFile.isEmpty()) {
-            try {
+        try {
+            if (logoFile.getSize() > 0) {
                 logoName = UUID.randomUUID() + "_" + logoFile.getOriginalFilename();
                 String location = "logos/";
-                Path directoryPath = Paths.get(LOCATION_IMAGES, location);
-                Files.createDirectories(directoryPath);
-                Path filePath = directoryPath.resolve(logoName);
-                Files.copy(logoFile.getInputStream(), filePath);
-            } catch (IOException e) {
-                log.error("Error while uploading image: {}", e.getMessage(), e);
-                throw new ImageUploadingException(HttpStatus.BAD_REQUEST, ImageUploadingException.IMAGE_ERROR);
+                File pathFile = new File(LOCATION_IMAGES);
+                if (!pathFile.exists()) {
+                    pathFile.mkdir();
+                }
+                pathFile = new File(location + logoName);
+                logoFile.transferTo(pathFile);
             }
+        } catch (IOException e) {
+            log.error("Error while uploading image: {}", e.getMessage(), e);
+            throw new ImageUploadingException(HttpStatus.BAD_REQUEST, ImageUploadingException.IMAGE_ERROR);
         }
         return logoName;
     }

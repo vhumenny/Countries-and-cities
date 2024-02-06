@@ -1,0 +1,46 @@
+version: "3.5"
+
+services:
+  db:
+    image: postgres:14-alpine
+    restart: always
+    hostname: db
+    container_name: db
+    environment:
+      POSTGRES_USER: $AND_DB_USER
+      POSTGRES_PASSWORD: $AND_DB_PASS
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/create_databases.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - countries_and_cities-net
+
+  countries_and_cities-server:
+    hostname: countries_and_cities
+    container_name: countries_and_cities
+    image: countries_and_cities
+    restart: always
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_USERNAME: $AND_DB_USER
+      SPRING_DATASOURCE_PASSWORD: $AND_DB_PASS
+      SPRING_DATASOURCE_URL: $AND_DB_URL
+      SPRING_LIQUIBASE_USERNAME: $AND_DB_USER
+      SPRING_LIQUIBASE_PASSWORD: $AND_DB_PASS
+      SPRING_LIQUIBASE_URL: $AND_DB_URL
+    depends_on:
+      - db
+    networks:
+      - countries_and_cities-net
+
+networks:
+  countries_and_cities-net:
+    name: countries_and_cities-local
+    driver: bridge
