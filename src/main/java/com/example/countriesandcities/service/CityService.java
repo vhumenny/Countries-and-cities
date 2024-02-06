@@ -2,9 +2,7 @@ package com.example.countriesandcities.service;
 
 import com.example.countriesandcities.dto.request.CityUpdateRequestDto;
 import com.example.countriesandcities.dto.response.CityResponseDto;
-import com.example.countriesandcities.dto.response.MessageResponseDto;
 import org.springframework.data.domain.Page;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
