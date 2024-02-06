@@ -149,7 +149,6 @@ class CityServiceTest {
         //then
         assertEquals("New name", cityEntity.getName());
         verify(cityRepository, times(1)).findById(id);
-        verify(cityRepository, times(1)).save(cityEntity);
     }
 
     @Test
@@ -173,7 +172,6 @@ class CityServiceTest {
         cityService.updateCity(id, cityUpdateRequestDto);
         //then
         verify(cityRepository, times(1)).findById(id);
-        verify(cityRepository, times(1)).save(cityEntity);
     }
 
     @Test

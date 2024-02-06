@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -75,6 +76,7 @@ public class CityServiceImpl implements CityService {
         return uniqueCityNames;
     }
 
+    @Transactional
     @Override
     public void updateCity(Long cityId, CityUpdateRequestDto cityUpdateRequestDto) {
         log.info("{updateCity}.start -> updating city with id {}", cityId);
@@ -86,7 +88,6 @@ public class CityServiceImpl implements CityService {
             cityEntity.setLogo(getLogoPart(cityUpdateRequestDto.logo()));
         }
 
-        cityRepository.save(cityEntity);
         log.info("{updateCity}.end -> successfully updated city with id {}", cityId);
     }
 
